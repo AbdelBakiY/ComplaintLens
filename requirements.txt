@@ -1,0 +1,110 @@
+# ComplaintLens — dépendances
+# Install : pip install -r requirements.txt
+# PyTorch s'installe À PART (voir en bas) avant ce fichier.
+
+# ---------- L0 Données ----------
+polars
+pyarrow
+duckdb
+pandas
+dvc
+
+# ---------- L1 Prétraitement / EDA ----------
+spacy
+nltk
+ftfy
+langdetect
+textstat
+matplotlib
+seaborn
+plotly
+wordcloud
+
+# ---------- L2 Baselines classiques ----------
+scikit-learn
+lightgbm
+optuna
+imbalanced-learn
+
+# ---------- L3 Embeddings / LM ----------
+gensim
+umap-learn
+kenlm ; platform_system != "Windows"
+
+# ---------- L5 Transformers ----------
+transformers
+datasets
+tokenizers
+accelerate
+evaluate
+sentencepiece
+safetensors
+
+# ---------- L6 NER / extraction ----------
+sklearn-crfsuite
+pytorch-crf
+seqeval
+label-studio
+presidio-analyzer
+presidio-anonymizer
+dateparser
+price-parser
+
+# ---------- L7 Topics / similarité ----------
+bertopic
+hdbscan
+sentence-transformers
+datasketch
+
+# ---------- L8 Résumé ----------
+rouge-score
+bert-score
+networkx
+
+# ---------- L9 LLM / RAG ----------
+peft
+bitsandbytes
+trl
+faiss-cpu
+rank-bm25
+pydantic
+ollama
+openai
+
+# ---------- L10 Explicabilité / robustesse ----------
+shap
+lime
+captum
+cleanlab
+codecarbon
+
+# ---------- MLOps / serving ----------
+mlflow
+hydra-core
+fastapi
+uvicorn
+onnxruntime
+optimum[onnxruntime]
+streamlit
+python-dotenv
+
+# ---------- Stats / tests ----------
+scipy
+statsmodels
+pytest
+pytest-cov
+ruff
+mypy
+pre-commit
+jupyterlab
+ipywidgets
+tqdm
+
+# ---------- PyTorch (installer AVANT le reste) ----------
+# GPU CUDA 12.x : pip install torch --index-url https://download.pytorch.org/whl/cu124
+# CPU seulement : pip install torch --index-url https://download.pytorch.org/whl/cpu
+#
+# ---------- Après installation ----------
+# python -m spacy download en_core_web_sm
+# python -m spacy download en_core_web_trf
+# python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords'); nltk.download('wordnet'); nltk.download('vader_lexicon')"

@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Data (raw/interim exports, parquet, zips — too large / not code)
+data/
+
+# OS
+.DS_Store
+Thumbs.db
