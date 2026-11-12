@@ -1,0 +1,6 @@
+tokenizer,taille vocab,tokens / récit,médiane,fertilité,% récits > 512,gain vs GPT-2 (%)
+GPT-2 (générique),50263,243.6,158,1.155,9.8,0.0
+BPE plaintes 8k,8006,245.5,158,1.164,10.1,-0.8
+BPE plaintes 16k,16006,235.9,154,1.118,9.4,3.2
+BPE plaintes 30k,30528,232.8,152,1.103,9.1,4.4
+BPE plaintes 50k,50263,231.8,151,1.098,9.1,4.8

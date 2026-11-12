@@ -1,0 +1,5 @@
+tokenizer,vocab vu (train),% OOV (val),tokens / récit,médiane,fertilité (tokens/mot),% récits > 512
+espaces,68016,1.01,211.0,139,1.0,7.5
+spaCy,41161,0.48,228.1,149,1.08,8.8
+BPE GPT-2,25008,0.12,243.6,158,1.15,9.8
+WordPiece BERT,15282,0.05,246.6,160,1.17,10.3
