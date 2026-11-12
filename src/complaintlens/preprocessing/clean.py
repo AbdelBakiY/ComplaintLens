@@ -3,24 +3,25 @@ L1 - Nettoyage des récits.
 
 Deux niveaux :
   - "light" : pour les transformers. On garde la casse, la ponctuation et les nombres.
-  - "full"  : pour TF-IDF. "light" + minuscules, nombres -> [NUM], ponctuation répétée réduite.
+  - "full"  : pour TF-IDF. "light" + minuscules, références au Code américain -> usc_XXXX,
+              nombres -> [NUM], ponctuation répétée réduite.
 
 Règles communes (décisions du L1) :
   - apostrophes, guillemets, tirets et puces typographiques normalisés ;
   - URL -> [URL], email -> [EMAIL] ;
   - dates masquées ou non (XX/XX/XXXX, XX/XX/2020, 03/12/19) -> [DATE], sans l'année ;
   - montants {$790.00} -> [MONEY] ;
-  - masques XXXX (simples, longs, XXXX/XXXX) -> [MASK], et une rafale de masques -> un seul [MASK] ;
-  - références de loi (FCRA, 15 USC 1681...) gardées telles quelles ;
+  - masques XXXX (simples, longs, XXXX/XXXX) -> [PII], et une rafale de masques -> un seul [PII] ;
+  - références de loi (FCRA, 15 USC 1681...) gardées telles quelles en "light" ;
   - espaces et retours à la ligne -> un seul espace.
 
+Le token de masque s'appelle [PII] et non [MASK] : [MASK] est un token réservé de BERT.
+
 Le texte brut des splits n'est jamais modifié : ces fonctions produisent une nouvelle colonne.
-  - "full"  : pour TF-IDF. "light" + minuscules, références au Code américain -> usc_XXXX,
-              nombres -> [NUM], ponctuation répétée réduite.
 """
 import polars as pl
 
-SPECIAL_TOKENS = ["[MASK]", "[DATE]", "[MONEY]", "[URL]", "[EMAIL]", "[NUM]"]
+SPECIAL_TOKENS = ["[PII]", "[DATE]", "[MONEY]", "[URL]", "[EMAIL]", "[NUM]"]
 LEVELS = ("light", "full")
 
 TYPO_FROM = ["\u2019", "\u2018", "\u201c", "\u201d", "\u2013", "\u2014", "\u2022", "\u2026"]
@@ -31,7 +32,7 @@ EMAIL = r"\b[\w.+-]+@[\w-]+\.[\w.]+\b"
 DATE = r"\b(?:XX|\d{1,2})/(?:XX|\d{1,2})/(?:X{2,}|\d{2,4})\b"
 MONEY = r"\{\$[^}]*\}"
 MASK = r"X{2,}(?:/X{2,})*"
-MASK_RUN = r"\[MASK\](?:\s+\[MASK\])+"
+MASK_RUN = r"\[PII\](?:\s+\[PII\])+"
 NUMBER = r"\b\d[\d,.]*\b"
 # Références au Code américain : "15 U.S. Code 1681c2", "15 USC 1681", "15 U.S.C. § 1692e"...
 # (appliquée sur du texte déjà en minuscules) -> "usc_1681", "usc_1692"
@@ -51,9 +52,10 @@ def clean_expr(expr: pl.Expr, level: str = "light") -> pl.Expr:
         .str.replace_all(EMAIL, " [EMAIL] ")
         .str.replace_all(DATE, " [DATE] ")
         .str.replace_all(MONEY, " [MONEY] ")
-        .str.replace_all(MASK, " [MASK] ")
-        .str.replace_all(MASK_RUN, "[MASK]")
+        .str.replace_all(MASK, " [PII] ")
+        .str.replace_all(MASK_RUN, "[PII]")
     )
+
     if level == "full":
         out = (
             out.str.to_lowercase()
