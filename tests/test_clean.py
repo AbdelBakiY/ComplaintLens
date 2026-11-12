@@ -5,13 +5,13 @@ from clean import clean_text
 
 class TestCleanLight:
     def test_rafale_de_masques_un_seul_token(self):
-        assert clean_text("paid XXXX XXXX XXXX on time") == "paid [MASK] on time"
+        assert clean_text("paid XXXX XXXX XXXX on time") == "paid [PII] on time"
 
     def test_masque_long(self):
-        assert clean_text("account XXXXXXXX closed") == "account [MASK] closed"
+        assert clean_text("account XXXXXXXX closed") == "account [PII] closed"
 
     def test_masques_separes_par_virgule_restent_distincts(self):
-        assert clean_text("to XXXX, XXXX and") == "to [MASK] , [MASK] and"
+        assert clean_text("to XXXX, XXXX and") == "to [PII] , [PII] and"
 
     def test_dates_sans_annee(self):
         assert clean_text("on XX/XX/2020 and XX/XX/XXXX") == "on [DATE] and [DATE]"
@@ -49,7 +49,7 @@ class TestCleanFull:
         assert clean_text("I OWE {$10.00} for 3 years!!!", "full") == "i owe [MONEY] for [NUM] years!"
 
     def test_tokens_speciaux_restent_en_majuscules(self):
-        assert clean_text("Paid XXXX on XX/XX/2020", "full") == "paid [MASK] on [DATE]"
+        assert clean_text("Paid XXXX on XX/XX/2020", "full") == "paid [PII] on [DATE]"
 
     def test_reference_usc_simple(self):
         assert clean_text("under 15 USC 1681", "full") == "under usc_1681"

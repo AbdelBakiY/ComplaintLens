@@ -77,13 +77,13 @@ L'analyse du L1 est dans `notebooks/complaintlens-l1.ipynb` (exécuté sur Kaggl
 pytest -v
 ```
 
-**57 tests** dans `tests/` :
+**58 tests** dans `tests/` :
 
 | Fichier | Tests | Ce qui est vérifié |
 |---|---|---|
 | `test_ingestion_units.py` | 20 | Normalisation des doublons, échantillonnage tempéré, dédoublonnage, tirage des splits |
 | `test_splits_data.py` | 9 | Intégrité des splits réels (ne tournent que là où `data/processed/` existe, donc sur Kaggle) |
-| `test_clean.py` | 19 | Masques, dates, montants, URL, emails, rafales, références de loi, niveaux `light` / `full` |
+| `test_clean.py` | 20 | Masques, dates, montants, URL, emails, rafales, références de loi, niveaux `light` / `full` |
 | `test_linguistic.py` | 9 | Lemmes, mots vides, négations gardées, tokens spéciaux protégés, options (ignorés si `en_core_web_sm` est absent) |
 
 ## 4. Chiffres clés — L0
@@ -252,7 +252,7 @@ Temps : ≈ 48 s pour 5 000 récits avec 4 cœurs. `not` est le 2e token le plus
 
 ### L1
 - [x] Anomalie 2026 expliquée
-- [x] `clean.py` (19 tests)
+- [x] `clean.py` (20 tests)
 - [x] Comparaison des 4 tokenizers
 - [x] BPE entraîné sur les plaintes (30k et 50k, dans l'Output Kaggle du notebook L1)
 - [x] `linguistic.py` (9 tests)
@@ -294,7 +294,7 @@ ComplaintLens/
 │   ├── conftest.py
 │   ├── test_ingestion_units.py        # 20 tests
 │   ├── test_splits_data.py            # 9 tests
-│   ├── test_clean.py                  # 19 tests
+│   ├── test_clean.py                  # 20 tests
 │   └── test_linguistic.py             # 9 tests
 ├── notebooks/
 │   └── complaintlens-l1.ipynb         # analyse du L1 (Kaggle)
