@@ -1,0 +1,11 @@
+product,train,val,test,drift_2026
+credit_reporting,24573,30275,55624,2218
+debt_collection,15206,6010,13302,29413
+credit_card,11370,3980,7072,20182
+mortgage,10946,1510,2543,7768
+checking_savings,10389,3843,8563,21288
+student_loan,6510,1010,2003,4046
+money_transfer,6365,1325,6644,9718
+vehicle_loan,6003,954,2122,5876
+payday_personal_loan,5009,631,1436,4342
+prepaid_card,3629,462,691,1459

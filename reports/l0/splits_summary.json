@@ -1,0 +1,43 @@
+{
+  "source": "data/interim/narratives_dedup.parquet",
+  "seed": 42,
+  "alpha": 0.5,
+  "requested": {
+    "train": 100000,
+    "val": 50000,
+    "test": 100000
+  },
+  "obtained": {
+    "train": 100000,
+    "val": 50000,
+    "test": 100000,
+    "drift_2026": 106310
+  },
+  "pool_after_dedup": {
+    "train": 1271863,
+    "val": 391836,
+    "test": 546372,
+    "drift_2026": 106310
+  },
+  "train_targets": {
+    "credit_reporting": 24573,
+    "mortgage": 10946,
+    "debt_collection": 15206,
+    "vehicle_loan": 6003,
+    "credit_card": 11370,
+    "payday_personal_loan": 5009,
+    "prepaid_card": 3629,
+    "checking_savings": 10389,
+    "student_loan": 6510,
+    "money_transfer": 6365
+  },
+  "checks": {
+    "IDs uniques entre splits": true,
+    "Aucun groupe de doublons dans 2 splits": true,
+    "train <= 2023": true,
+    "val = 2024": true,
+    "test = 2025": true,
+    "drift = 2026": true,
+    "Aucun __DROP__": true
+  }
+}
