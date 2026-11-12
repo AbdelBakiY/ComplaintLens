@@ -1,6 +1,0 @@
-0- telcharger les zip dans data
-1- zip to parquet : zip_to_parquet.py
-1bis- analyser et afficher les distribustions : audit_l0.py
-2- filtr ou la colonne narrative nest pas vide : src/complaintlens/ingestion/filter_narratives.py
-3- cree un csv de mapping dans configs : manuelle 
-4- mapper sur la nouvelle taxo : src/complaintlens/ingestion/apply_product_mapping.py
