@@ -51,8 +51,17 @@ class TestCleanFull:
     def test_tokens_speciaux_restent_en_majuscules(self):
         assert clean_text("Paid XXXX on XX/XX/2020", "full") == "paid [MASK] on [DATE]"
 
-    def test_reference_de_loi(self):
-        assert clean_text("under 15 USC 1681", "full") == "under [NUM] usc [NUM]"
+    def test_reference_usc_simple(self):
+        assert clean_text("under 15 USC 1681", "full") == "under usc_1681"
+
+    def test_reference_us_code_avec_sous_section(self):
+        assert clean_text("15 U.S. Code 1681c2 - Block", "full") == "usc_1681 - block"
+
+    def test_reference_avec_parenthese_numerotee(self):
+        assert clean_text("15 US Code 1692a ( 6 )", "full") == "usc_1692 ( [NUM] )"
+
+    def test_reference_avec_paragraphe(self):
+        assert clean_text("15 U.S.C. \u00a7 1692e", "full") == "usc_1692"
 
 
 def test_niveau_inconnu():

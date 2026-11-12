@@ -15,6 +15,8 @@ Règles communes (décisions du L1) :
   - espaces et retours à la ligne -> un seul espace.
 
 Le texte brut des splits n'est jamais modifié : ces fonctions produisent une nouvelle colonne.
+  - "full"  : pour TF-IDF. "light" + minuscules, références au Code américain -> usc_XXXX,
+              nombres -> [NUM], ponctuation répétée réduite.
 """
 import polars as pl
 
@@ -31,6 +33,9 @@ MONEY = r"\{\$[^}]*\}"
 MASK = r"X{2,}(?:/X{2,})*"
 MASK_RUN = r"\[MASK\](?:\s+\[MASK\])+"
 NUMBER = r"\b\d[\d,.]*\b"
+# Références au Code américain : "15 U.S. Code 1681c2", "15 USC 1681", "15 U.S.C. § 1692e"...
+# (appliquée sur du texte déjà en minuscules) -> "usc_1681", "usc_1692"
+LAW_USC = r"\b(?:15\s*)?u\.?\s*s\.?\s*(?:c\.?|code)\s*(?:§+\s*)?(\d{4})\w*"
 REPEATED_PUNCT = r"([!?.])[!?.]+"
 
 
@@ -49,12 +54,13 @@ def clean_expr(expr: pl.Expr, level: str = "light") -> pl.Expr:
         .str.replace_all(MASK, " [MASK] ")
         .str.replace_all(MASK_RUN, "[MASK]")
     )
-
     if level == "full":
         out = (
             out.str.to_lowercase()
             # remettre les tokens spéciaux en majuscules après le passage en minuscules
             .str.replace_many([t.lower() for t in SPECIAL_TOKENS], SPECIAL_TOKENS)
+            # unifier les références de loi AVANT de remplacer les nombres
+            .str.replace_all(LAW_USC, " usc_${1} ")
             .str.replace_all(NUMBER, " [NUM] ")
             .str.replace_all(REPEATED_PUNCT, "${1}")
         )
