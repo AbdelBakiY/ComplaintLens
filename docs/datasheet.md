@@ -2,6 +2,7 @@
 
 > Format : *Datasheets for Datasets* (Gebru et al., 2021).
 > Version du corpus : **v1 — 12/11/2026** · Graine : **42** · Code : `src/complaintlens/ingestion/`
+> Auteur : **Abdel** — projet personnel.
 
 ---
 
@@ -17,7 +18,7 @@ Pour construire et évaluer ComplaintLens, une chaîne NLP de bout en bout sur d
 - Tâches non supervisées : thèmes, dérive temporelle, détection de campagnes de lettres types.
 
 **Qui l'a créé ?**
-Youcef, dans le cadre d'un projet de M2 ISD (Université Paris-Saclay). Les données sources sont publiées par le CFPB.
+Abdel, dans le cadre d'un projet personnel. Les données sources sont publiées par le CFPB.
 
 **Financement :** aucun.
 
@@ -52,20 +53,20 @@ Une plainte de consommateur déposée auprès du Consumer Financial Protection B
 | Identité et dates | `complaint_id`, `date_received`, `year`, `date_sent_to_company` | Identifiant, split temporel |
 | Ajoutés par le pipeline | `n_chars`, `n_words`, `n_masks`, `source_export`, `text_hash`, `dup_group`, `dup_count`, `split` | Traçabilité, filtrage, dédoublonnage |
 
-**Les 10 classes de produit**, après harmonisation (voir §4) et sur l'ensemble des 3,84 M de récits :
+**Les 10 classes de produit**, après harmonisation (voir §4) :
 
-| Classe | Récits | Part avant dédup | Part après dédup |
-|---|---|---|---|
-| credit_reporting | 2 510 397 | 65,3 % | 48,0 % |
-| debt_collection | 445 229 | 11,6 % | 15,9 % |
-| credit_card | 228 184 | 5,9 % | 9,2 % |
-| checking_savings | 204 227 | 5,3 % | 8,6 % |
-| mortgage | 147 249 | 3,8 % | 6,3 % |
-| money_transfer | 123 514 | 3,2 % | 4,1 % |
-| student_loan | 63 196 | 1,6 % | 2,7 % |
-| vehicle_loan | 59 758 | 1,6 % | 2,5 % |
-| payday_personal_loan | 41 188 | 1,1 % | 1,8 % |
-| prepaid_card | 21 423 | 0,6 % | 0,9 % |
+| Classe | Récits (avant dédup) | Part avant dédup | Récits uniques | Part après dédup |
+|---|---|---|---|---|
+| credit_reporting | 2 510 397 | 65,3 % | 1 111 141 | 48,0 % |
+| debt_collection | 445 229 | 11,6 % | 368 079 | 15,9 % |
+| credit_card | 228 184 | 5,9 % | 212 229 | 9,2 % |
+| checking_savings | 204 227 | 5,3 % | 199 245 | 8,6 % |
+| mortgage | 147 249 | 3,8 % | 146 910 | 6,3 % |
+| money_transfer | 123 514 | 3,2 % | 95 006 | 4,1 % |
+| student_loan | 63 196 | 1,6 % | 62 640 | 2,7 % |
+| vehicle_loan | 59 758 | 1,6 % | 58 894 | 2,5 % |
+| payday_personal_loan | 41 188 | 1,1 % | 40 906 | 1,8 % |
+| prepaid_card | 21 423 | 0,6 % | 21 331 | 0,9 % |
 
 **Splits livrés** (dans `data/processed/`)
 
@@ -119,7 +120,7 @@ Le consommateur remplit un formulaire : il choisit le produit et le motif, puis 
 
 **Intégrité :** les sommes SHA-256 des 22 ZIP téléchargés sont enregistrées dans `data/raw/manifest.json`.
 
-**Licence :** ⚠️ À VÉRIFIER. Données publiées par une agence fédérale américaine. Confirme les conditions de réutilisation sur le site du CFPB avant toute diffusion du corpus dérivé.
+**Licence :** ⚠️ À VÉRIFIER. Données publiées par une agence fédérale américaine. Confirmer les conditions de réutilisation sur le site du CFPB avant toute diffusion du corpus dérivé.
 
 ---
 
@@ -158,7 +159,7 @@ Le CFPB a renommé ses catégories en 2017 et en 2023. Toutes les étiquettes so
 3. Train : échantillonnage tempéré, avec une part de la classe *c* proportionnelle à n_c^0,5. Le poids du credit reporting passe de 45 % à 25 %, celui de `prepaid_card` de 1 % à 3,6 %.
 4. Val et test : tirage aléatoire, **distribution naturelle conservée**, pour mesurer la performance dans les conditions réelles.
 5. Le tirage repose sur le hash de `complaint_id` avec la graine 42 : il est entièrement reproductible et ne dépend pas de l'ordre des lignes.
-6. Contrôles validés : aucun identifiant ni groupe de doublons dans deux splits, années conformes, aucun `__DROP__`.
+6. Contrôles validés (29 tests pytest) : aucun identifiant ni groupe de doublons dans deux splits, années conformes, aucun `__DROP__`, tailles conformes.
 
 **Les données brutes sont-elles conservées ?** Oui : les 21 ZIP et tous les fichiers intermédiaires.
 
@@ -182,7 +183,7 @@ Le CFPB a renommé ses catégories en 2017 et en 2023. Toutes les étiquettes so
 ## 6. Usages
 
 **Usages prévus**
-- Recherche et enseignement en NLP : classification, extraction d'information, thèmes, résumé, RAG.
+- Recherche et apprentissage en NLP : classification, extraction d'information, thèmes, résumé, RAG.
 - Étude de la dérive temporelle et des campagnes de plaintes coordonnées.
 
 **Usages déconseillés**
@@ -190,8 +191,6 @@ Le CFPB a renommé ses catégories en 2017 et en 2023. Toutes les étiquettes so
 - Classer, évaluer ou comparer des entreprises à partir de ces récits.
 - Prendre une décision automatique sur un client réel sans validation humaine.
 - Tenter de réidentifier des consommateurs à partir des récits.
-
-⚠️ À COMPLÉTER : ajoute ici tout usage spécifique que tu veux exclure ou encourager.
 
 ---
 
@@ -208,10 +207,11 @@ python src/complaintlens/ingestion/filter_narratives.py
 python src/complaintlens/ingestion/apply_product_mapping.py
 python src/complaintlens/ingestion/find_duplicates.py --min-words 10
 python src/complaintlens/ingestion/make_splits.py --alpha 0.5 --n-val 50000 --n-test 100000 --seed 42
+pytest -v
 ```
 
-- **Paramètres de la v1 :** seuil de doublon = 10 mots, graine du hash = 42, α = 0,5, graine des splits = 42.
-- **Contact :** Youcef — ⚠️ À COMPLÉTER.
+- **Paramètres de la v1 :** seuil de doublon = 10 mots, graine du hash = 42, α = 0,5, graine des splits = 42, polars 2.1.0.
+- **Contact :** Abdel.
 
 | Version | Date | Changement |
 |---|---|---|
