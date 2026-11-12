@@ -1,0 +1,5 @@
+configuration,vocabulaire,tokens / récit,temps (s)
+ponctuation retirée seulement,15086,201.7,51.3
++ mots vides retirés,14795,94.5,50.7
++ lemmatisation,11908,201.7,61.1
++ les deux,11701,94.5,65.0
