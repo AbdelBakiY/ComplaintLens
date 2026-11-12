@@ -172,11 +172,13 @@ Le CFPB a renommé ses catégories en 2017 et en 2023. Toutes les étiquettes so
 3. **Biais d'autosélection.** Seuls les consommateurs qui se plaignent, et qui consentent à publier leur récit, sont représentés (environ 22 % des plaintes). Le corpus n'est pas un échantillon représentatif de la clientèle.
 4. **Campagnes de lettres types.** Près de la moitié des récits sont des copies. La dédup exacte les traite, mais **pas les quasi-doublons** (lettres modifiées d'une phrase). ⚠️ Des variantes proches peuvent encore apparaître à la fois en train et en test. Une détection MinHash/LSH est prévue.
 5. **Changement de distribution entre train et test.** Train rééquilibré (25 % de credit reporting) contre test naturel (56 %). C'est voulu, mais le modèle tendra à sous-prédire le credit reporting.
-6. **Dérive temporelle.** La part du credit reporting passe de 55,6 % (2025) à 2,1 % (2026), alors que les autres classes gardent des volumes cohérents. ⚠️ Cause non identifiée : changement de politique de publication propre à ce produit ? À investiguer avant toute conclusion sur `drift_2026`.
+6. **Rupture de publication du credit reporting au 1er janvier 2026.** Les récits `credit_reporting` passent de 38 858 en décembre 2025 à 862 en janvier 2026 (÷ 45), puis restent sous 900 par mois. La chute touche toutes les entreprises dans les mêmes proportions (Equifax, TransUnion, Experian et les autres : ÷ 100 à 370 entre 2025 et 2026), et autant les récits uniques que les copies. Les autres produits ne subissent qu'un creux ponctuel en janvier 2026 et retrouvent leur niveau dès février. Il s'agit donc d'un changement de publication propre à ce produit, et non d'une évolution des plaintes ; la cause exacte n'est pas documentée dans les données. Conséquence : les récits `credit_reporting` de `drift_2026` ne mesurent pas une dérive réelle, et la dérive 2026 s'évalue classe par classe.
+
 7. **Effondrement des récits en 2026.** 2,5 % des plaintes de 2026 ont un récit, et un seul récit en août 2026. C'est la conséquence de l'arrêt de la publication.
 8. **Taxonomie `issue` non harmonisée.** Les motifs ont aussi changé en 2017 et 2023. ⚠️ À traiter avant la tâche 2.
 9. **Langue.** Récits quasi exclusivement en anglais américain, avec des fautes d'orthographe et des styles très variables. ⚠️ La détection de langue n'a pas été appliquée.
 10. **Géographie.** Uniquement des plaintes adressées au régulateur américain : pas de transposition directe à un autre cadre réglementaire.
+11. **Campagne de janvier 2025.** Pic simultané en `money_transfer` (≈ 42 000 récits dans le mois, contre ≈ 1 000 habituellement), `checking_savings` et `student_loan`, visible aussi sur les récits uniques : une campagne de plaintes à textes variants, que la dédup exacte ne détecte pas. ⚠️ Justifie la détection de quasi-doublons (MinHash).
 
 ---
 

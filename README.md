@@ -120,7 +120,8 @@ pytest -v
 
 ## 6. Points d'attention
 
-- ⚠️ **Anomalie `credit_reporting` 2026** : 2 218 récits uniques en 2026 contre 302 422 en 2025, alors que les autres classes restent cohérentes. Cause non identifiée (changement de politique de publication propre à ce produit ?). À investiguer avant d'interpréter `drift_2026`.
+- **Rupture `credit_reporting` 2026 (expliquée)** : au 1er janvier 2026, la publication des récits de credit reporting s'arrête quasiment (÷ 45 en un mois, toutes entreprises confondues), alors que les autres produits continuent. Artefact de publication, pas une dérive réelle : `drift_2026` s'évalue classe par classe. Détail dans la datasheet §5.
+- ⚠️ **Campagne de janvier 2025** : pic massif de récits à textes variants en `money_transfer`, `checking_savings` et `student_loan`, invisible pour la dédup exacte. Le MinHash devient prioritaire.
 - **Quasi-doublons non traités** : la dédup est exacte. Des variantes proches d'une même lettre type peuvent encore se trouver à la fois en train et en test.
 - **Écart de distribution voulu** : 25 % de credit reporting en train, 56 % en test. Le modèle tendra à sous-prédire cette classe : à étudier en L2 (comparaison de α, correction des logits).
 - **Bruit d'étiquette** : les étiquettes sont choisies par le consommateur ; certains groupes de copies identiques portent plusieurs produits.
@@ -130,7 +131,7 @@ pytest -v
 ### Clôture de L0 (non bloquant pour L1)
 - [x] Dédoublonnage définitif et splits (`make_splits.py`)
 - [x] Tests (29) et datasheet (`docs/datasheet.md`)
-- [ ] Investiguer l'anomalie `credit_reporting` 2026
+- [x] Investiguer l'anomalie `credit_reporting` 2026
 - [ ] Harmoniser la taxonomie `issue` / `sub_issue` (`configs/issue_mapping.csv`) — **indispensable avant la tâche 2**
 - [ ] Quasi-doublons MinHash/LSH (`datasketch`), réutilisable en L7
 - [ ] Reproductibilité : `dvc init`, `dvc.yaml`, `Makefile`, script de vérification des SHA-256
