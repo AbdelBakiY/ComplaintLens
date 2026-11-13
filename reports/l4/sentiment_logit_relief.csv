@@ -1,0 +1,5 @@
+mesure du ton,modèle,odds ratio (+1 écart-type de ton),IC 95 %,p-valeur
+roberta,sans le produit,1.248,[1.162 ; 1.340],0.0
+roberta,à produit égal,1.08,[1.003 ; 1.163],0.0424
+vader,sans le produit,0.783,[0.723 ; 0.847],0.0
+vader,à produit égal,0.867,[0.796 ; 0.944],0.001
