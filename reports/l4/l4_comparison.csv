@@ -1,0 +1,7 @@
+modèle,macro_f1,accuracy
+"BiLSTM + attention, carte Word2Vec",0.766,0.858
+TF-IDF + SVM réglé (L2),0.763,0.856
+"TextCNN, carte Word2Vec",0.76,0.854
+"BiLSTM + attention, carte au hasard",0.747,0.846
+"TextCNN, carte au hasard",0.745,0.849
+Moyenne Word2Vec + LR (L3),0.7,0.829

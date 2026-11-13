@@ -1,0 +1,9 @@
+aspect,modèle,odds ratio,IC 95 %,p-valeur
+delais,sans le produit,1.63,[1.38 ; 1.93],0.0
+delais,à produit égal,1.18,[0.99 ; 1.40],0.0658
+frais,sans le produit,3.8,[3.21 ; 4.50],0.0
+frais,à produit égal,2.25,[1.88 ; 2.69],0.0
+fraude,sans le produit,1.24,[1.05 ; 1.46],0.0102
+fraude,à produit égal,1.14,[0.96 ; 1.36],0.1411
+service_client,sans le produit,3.1,[2.62 ; 3.67],0.0
+service_client,à produit égal,1.5,[1.26 ; 1.78],0.0

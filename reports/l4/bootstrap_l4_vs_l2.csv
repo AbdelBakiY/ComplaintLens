@@ -1,0 +1,4 @@
+comparaison,écart,IC 95 % bas,IC 95 % haut,part où A ne gagne pas
+BiLSTM W2V - SVM (L2),0.0036,-0.0017,0.0093,0.089
+TextCNN W2V - SVM (L2),-0.0021,-0.0074,0.0032,0.798
+BiLSTM W2V - TextCNN W2V,0.0058,0.0004,0.0112,0.016

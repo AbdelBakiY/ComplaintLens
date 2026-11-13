@@ -1,0 +1,11 @@
+classe,moyenne (L3),TextCNN W2V,SVM (L2),gain vs moyenne,écart vs SVM
+payday_personal_loan,0.404,0.542,0.542,0.138,0.0
+vehicle_loan,0.61,0.709,0.708,0.099,0.001
+student_loan,0.812,0.874,0.868,0.062,0.006
+prepaid_card,0.66,0.721,0.735,0.061,-0.014
+mortgage,0.833,0.888,0.873,0.055,0.015
+credit_card,0.69,0.735,0.745,0.045,-0.01
+checking_savings,0.771,0.81,0.812,0.039,-0.002
+money_transfer,0.656,0.694,0.706,0.038,-0.012
+debt_collection,0.678,0.71,0.715,0.032,-0.005
+credit_reporting,0.91,0.921,0.922,0.011,-0.001
