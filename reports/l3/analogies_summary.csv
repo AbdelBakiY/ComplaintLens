@@ -1,0 +1,7 @@
+modèle,catégorie,n,ok@1,ok@5
+FastText,entreprise -> produit,72,0.056,0.194
+Word2Vec,entreprise -> produit,72,0.097,0.292
+FastText,loi -> domaine,12,0.0,0.167
+Word2Vec,loi -> domaine,12,0.0,0.0
+FastText,problème -> produit,20,0.0,0.1
+Word2Vec,problème -> produit,20,0.0,0.15

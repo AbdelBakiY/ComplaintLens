@@ -1,0 +1,6 @@
+représentation,dimensions,accuracy,macro_f1
+TF-IDF + SVM réglé (L2),200000,0.856,0.763
+TF-IDF + régression logistique (L2),200000,0.848,0.752
+"Word2Vec, moyenne",100,0.829,0.701
+"FastText, moyenne (avec inconnus)",100,0.829,0.699
+"Word2Vec, moyenne pondérée IDF",100,0.818,0.678

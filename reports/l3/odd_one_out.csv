@@ -1,0 +1,11 @@
+mots,intrus attendu,Word2Vec,FastText
+"equifax, experian, transunion, navient",navient,navient,navient
+"navient, nelnet, mohela, ocwen",ocwen,ocwen,ocwen
+"mortgage, escrow, foreclosure, overdraft",overdraft,overdraft,overdraft
+"car, truck, vehicle, house",house,house,house
+"paypal, venmo, zelle, escrow",escrow,escrow,escrow
+"prepaid, netspend, gift, foreclosure",foreclosure,foreclosure,foreclosure
+"debt, collector, collection, appraisal",appraisal,appraisal,appraisal
+"fraud, unauthorized, scam, refinance",refinance,refinance,refinance
+"overdraft, deposit, checking, repossess",repossess,repossess,repossess
+"forbearance, deferment, repayment, dealership",dealership,dealership,dealership

@@ -1,0 +1,7 @@
+mots,attendu,Word2Vec,GloVe
+"mortgage, escrow, foreclosure, overdraft",overdraft,overdraft,overdraft
+"car, truck, vehicle, house",house,house,house
+"debt, collector, collection, appraisal",appraisal,appraisal,appraisal
+"fraud, unauthorized, scam, refinance",refinance,refinance,refinance
+"overdraft, deposit, checking, repossess",repossess,repossess,repossess
+"forbearance, deferment, repayment, dealership",dealership,dealership,dealership
