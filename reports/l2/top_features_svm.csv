@@ -1,0 +1,11 @@
+classe,mots les plus décisifs
+checking_savings,"bank, branch, overdraft, chime, deposit, debit card, checking, cd, debit, saving, banking, check"
+credit_card,"card, credit card, capital, barclay, citi, synchrony, reward, charge, comenity, discover, chase, balance transfer"
+credit_reporting,"experian, equifax, transunion, report, inquiry, score, incorrect, trans union, remove, trans, reporting, usc_1681"
+debt_collection,"debt, collection, owe, recovery, collect, inc, midland, call, medical, erc, bill, company"
+money_transfer,"coinbase, paypal, venmo, transfer, wire, zelle, money, moneygram, western union, send [MONEY], send money, western"
+mortgage,"mortgage, escrow, modification, home, foreclosure, appraisal, property, closing, ocwen, house, loancare, ditech"
+payday_personal_loan,"loan, personal loan, title loan, borrow, payday, line credit, main financial, installment, affirm, installment loan, [MONEY] loan, loan [MONEY]"
+prepaid_card,"card, prepaid, netspend, unemployment, prepay, edd, gift, direct express, reliacard, bluebird, rushcard, gift card"
+student_loan,"navient, nelnet, mohela, student, fedloan, school, student loan, loan, repayment, aes, aidvantage, edfinancial"
+vehicle_loan,"vehicle, car, santander, ally, lease, auto loan, auto, dealership, dealer, finance, repossess, toyota"

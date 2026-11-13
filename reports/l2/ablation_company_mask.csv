@@ -1,0 +1,11 @@
+classe,f1_référence,f1_masqué,écart
+student_loan,0.868,0.82,-0.048
+money_transfer,0.706,0.672,-0.034
+payday_personal_loan,0.542,0.51,-0.032
+debt_collection,0.715,0.695,-0.02
+vehicle_loan,0.708,0.688,-0.02
+checking_savings,0.812,0.793,-0.019
+credit_card,0.745,0.73,-0.015
+mortgage,0.873,0.86,-0.013
+prepaid_card,0.735,0.729,-0.006
+credit_reporting,0.922,0.917,-0.005

@@ -1,0 +1,11 @@
+classe,Régression logistique | mots,Naive Bayes | mots,SVM linéaire | mots,SVM linéaire | caractères,SVM linéaire | mots + caractères,LightGBM | mots (20k chi2)
+checking_savings,0.806,0.793,0.805,0.801,0.804,0.815
+credit_card,0.732,0.703,0.733,0.727,0.729,0.734
+credit_reporting,0.917,0.915,0.917,0.916,0.916,0.917
+debt_collection,0.706,0.685,0.71,0.71,0.708,0.699
+money_transfer,0.704,0.672,0.701,0.687,0.696,0.707
+mortgage,0.871,0.799,0.867,0.866,0.87,0.882
+payday_personal_loan,0.532,0.379,0.544,0.523,0.549,0.534
+prepaid_card,0.712,0.732,0.719,0.706,0.715,0.715
+student_loan,0.863,0.803,0.859,0.86,0.858,0.87
+vehicle_loan,0.678,0.656,0.686,0.67,0.677,0.681

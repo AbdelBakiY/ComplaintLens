@@ -1,0 +1,4 @@
+config,macro_f1,accuracy,n_features
+"text_tfidf, mots 1-2 (référence)",0.7626,0.8557,200000
+"text_tfidf, mots 1 seulement",0.7521,0.8472,13570
+"text_full (sans lemmes, avec mots vides), mots 1-2",0.754,0.8534,200000

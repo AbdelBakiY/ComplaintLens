@@ -1,0 +1,9 @@
+modèle,features,accuracy,macro_f1,temps (s)
+SVM linéaire réglé,mots,0.856,0.763,
+LightGBM,mots (20k chi2),0.848,0.755,1553
+SVM linéaire,mots,0.848,0.754,18
+Régression logistique,TF-IDF mots 1-2,0.848,0.752,
+SVM linéaire,mots + caractères,0.847,0.752,98
+SVM linéaire,caractères,0.845,0.747,512
+Naive Bayes,mots,0.838,0.714,1
+Idiot (classe majoritaire),-,0.606,0.075,
