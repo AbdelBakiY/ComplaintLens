@@ -14,33 +14,36 @@ Une plateforme NLP de bout en bout sur les **plaintes clients du CFPB** (Consume
 - **Découpage** : 10 lots, de L0 (ingestion) à L10 (explicabilité et équité), plus un lot MLOps transverse.
 
 **Statut :**
-- **L0 — Ingestion et data engineering** : terminé (points ouverts listés en section 10).
+- **L0 — Ingestion et data engineering** : terminé (points ouverts listés en section 11).
 - **L1 — Prétraitement et analyse linguistique** : terminé.
 - **L2 — Baselines classiques** : terminé pour la cible Product (macro-F1 val 0,763). Cibles Issue et Company response à faire.
 - **L3 — Embeddings statiques et modèles de langue** : terminé.
-- Prochain lot : **L4 — Deep learning from scratch**.
+- **L4 — Deep learning from scratch** : terminé (un point restant : effet du ton à produit égal).
+- Prochain lot : **L5 — Transformers et fine-tuning**.
 
 ## 2. Environnement et workflow
 
 | Où | Quoi |
 |---|---|
 | **PC** (Windows, VS Code, Python 3.13) | Écriture du code, tests unitaires, `git push` |
-| **Kaggle** (notebooks, ~30 Go de RAM, GPU 30 h/semaine) | `git pull`, exécution sur les vraies données, création des datasets |
+| **Kaggle** (notebooks, ~30 Go de RAM, GPU T4 30 h/semaine) | `git pull`, exécution sur les vraies données, création des datasets |
 | **GitHub** | Code, tests, configs, docs, rapports, notebooks. **Jamais de données ni de modèles.** |
 
 - Datasets Kaggle privés :
   - `complaintlens-data` : `narratives_dedup.parquet` ;
-  - `complaintlens-splits` : les 4 splits ;
+  - `complaintlens-splits` : les 4 splits (avec les métadonnées : réponse de l'entreprise, délai, entreprise…) ;
   - `complaintlens-features` : textes prétraités `{train,val,test}_text.parquet` ;
   - `complaintlens-l2-cache` : cache des calculs et modèle L2 (`svm_tfidf_v1.joblib`) ;
-  - `complaintlens-l3-cache` : cache L3 et embeddings (`w2v_complaints_d100.txt`, `ft_complaints_d100.kv`).
+  - `complaintlens-l3-cache` : cache L3 et embeddings (`w2v_complaints_d100.txt`, `ft_complaints_d100.kv`) ;
+  - `complaintlens-l4-cache` : cache L4 (poids des TextCNN et BiLSTM, scores de sentiment).
 - Traitement en **Polars** (2.1.0, version figée sur Kaggle) : lecture lazy, traitement par tranches, jamais la colonne `narrative` entière en mémoire sur le PC.
 - **spaCy** avec le modèle `en_core_web_sm` (`python -m spacy download en_core_web_sm`).
-- Tokenizers Hugging Face (`transformers`, `tokenizers`) et téléchargements (GloVe via `gensim.downloader`) : le notebook doit avoir **Internet : ON** sur Kaggle.
+- Tokenizers et modèles Hugging Face, GloVe (`gensim.downloader`), VADER : le notebook doit avoir **Internet : ON** sur Kaggle.
 - `data/` est dans le `.gitignore`. DVC est dans les dépendances mais n'est pas encore initialisé.
 - Tous les scripts se lancent **depuis la racine du projet** (chemins relatifs).
-- **Le CPU suffit pour L0 à L3.** Le GPU de Kaggle est réservé à l'entraînement des réseaux (L4, L5, L9).
-- **Cache dans les notebooks Kaggle** : chaque calcul long passe par une fonction `cached(nom, fonction)` qui sauvegarde son résultat avec `joblib`. Au Save & Run suivant, le résultat est rechargé depuis l'Output de la version précédente, ajouté en input. Changer le nom du cache dès que le code de l'étape change.
+- **Le CPU suffit pour L0 à L3.** Le GPU de Kaggle sert à l'entraînement des réseaux (L4, L5, L9).
+- **Cache dans les notebooks Kaggle** : chaque calcul long passe par une fonction `cached(nom, fonction)` qui sauvegarde son résultat avec `joblib`. Au Save & Run suivant, le résultat est rechargé depuis le dataset de cache du lot, ajouté en input. Changer le nom du cache dès que le code de l'étape change.
+- **Les entraînements sur GPU ne sont pas exactement reproductibles** : un même réseau réentraîné peut varier de quelques millièmes de macro-F1. Les chiffres du README sont ceux de la version sauvegardée du notebook.
 
 ## 3. Pipeline
 
@@ -74,8 +77,8 @@ Ces modules ne modifient jamais les données : ils produisent une version transf
 | `clean.py` | Nettoyage en 2 niveaux : `light` (transformers) et `full` (TF-IDF) | `clean_expr(colonne, niveau)`, `clean_text(texte, niveau)`, `SPECIAL_TOKENS` |
 | `linguistic.py` | Lemmatisation, retrait des mots vides (sauf négations) et de la ponctuation, avec spaCy | `process_texts(textes, ...)`, `process_text(texte, ...)` |
 
-Chaîne pour les modèles à base de mots (L2, L3) : `narrative` → `clean_expr(..., "full")` → `process_texts(...)` → TF-IDF ou embeddings.
-Chaîne pour les transformers (L5) : `narrative` → `clean_expr(..., "light")` → tokenizer du modèle, avec les `SPECIAL_TOKENS` déclarés.
+Chaîne pour les modèles à base de mots (L2, L3, L4) : `narrative` → `clean_expr(..., "full")` → `process_texts(...)` → TF-IDF, embeddings ou numéros de mots.
+Chaîne pour les transformers et le sentiment (L4, L5) : `narrative` → `clean_expr(..., "light")` → tokenizer du modèle, avec les `SPECIAL_TOKENS` déclarés.
 
 L'analyse du L1 est dans `notebooks/complaintlens-l1.ipynb` (exécuté sur Kaggle), ses résultats dans `reports/l1/`.
 
@@ -103,6 +106,20 @@ Tout est dans `notebooks/complaintlens-l3.ipynb` (Kaggle, CPU, ≈ 25 min au pre
 | 3 | Évaluation extrinsèque : moyenne des vecteurs + régression logistique | embeddings | `extrinsic_*.csv` |
 | 4 | Comparaison avec GloVe 100d (Wikipédia + Gigaword) | embeddings + GloVe | `*_glove_vs_w2v.csv`, `domain_shift_neighbors.csv` |
 | 5 | Trigramme Kneser-Ney par produit : perplexité, classification, génération | `text_full` | `ngram_perplexity_matrix.csv`, `ngram_generations.csv` |
+
+### L4 — Deep learning from scratch
+
+Tout est dans `notebooks/complaintlens-l4.ipynb` (Kaggle, GPU T4, ≈ 30 min au premier passage, quelques minutes ensuite grâce au cache). Inputs : `complaintlens-features`, `complaintlens-splits`, `complaintlens-l2-cache`, `complaintlens-l3-cache`.
+
+| # | Étape | Entrée | Sortie |
+|---|---|---|---|
+| 1 | Vocabulaire = carte Word2Vec du L3 (+ `<pad>`, `<unk>`), récits encodés en 256 numéros | `text_tfidf` | cache `encoded_len256.joblib` |
+| 2 | TextCNN (carte aléatoire / Word2Vec) | numéros de mots | `cnn_learning_curves.csv`, `cnn_per_class.csv` |
+| 3 | BiLSTM + attention (carte aléatoire / Word2Vec) | numéros de mots | `bilstm_learning_curves.csv`, `l4_comparison.csv` |
+| 4 | Bootstrap apparié contre le SVM du L2, erreurs communes | prédictions val | `bootstrap_l4_vs_l2.csv` |
+| 5 | Visualisation de l'attention | BiLSTM | `attention_examples.html`, `attention_top_words.csv` |
+| 6 | Sentiment VADER et RoBERTa transféré (20 000 récits de la val) | `text_light` + métadonnées | `sentiment_*.csv` |
+| 7 | ABSA : frais, service client, délais, fraude | `text_light` | `absa_*.csv` |
 
 ### Tests
 
@@ -352,7 +369,90 @@ Tout est appris sur le train uniquement.
 - **Classification par perplexité minimale** : accuracy 0,707, macro-F1 0,704 sur un échantillon équilibré (non comparable directement au L2).
 - **Génération** (amorce « i called the ») : vocabulaire propre à chaque produit (loss mitigation, promissory note, loan forgiveness, cash app) et cohérence locale, mais aucune cohérence au-delà de 2 mots. C'est la limite qui motive les réseaux récurrents (L4) et l'attention (L5).
 
-## 8. Décisions prises (à ne pas remettre en cause sans raison)
+## 8. Chiffres clés — L4 (deep learning from scratch)
+
+**Préparation** : vocabulaire = les 15 093 mots de la carte Word2Vec du L3 + `<pad>` (0) et `<unk>` (1), soit 15 095 numéros. Récits (`text_tfidf`) coupés ou complétés à **256 mots** : 6,2 % des récits du train sont coupés (médiane 67 mots, p95 280). Mots inconnus : 0,6 %.
+
+**Architectures** (PyTorch pur) :
+- **TextCNN** (Kim 2014) : embeddings 100d → 3 × 100 filtres de largeur 3, 4 et 5 → ReLU → max pooling sur la séquence → dropout 0,5 → couche linéaire (1,63 M de paramètres).
+- **BiLSTM + attention** : embeddings 100d (dropout 0,5) → BiLSTM 2 × 128 (séquences « packées », remplissage ignoré) → attention additive (couche 64, tanh, score par mot, softmax masqué) → dropout 0,5 → couche linéaire (1,76 M de paramètres).
+
+**Entraînement** : Adam (lr 1e-3), batch 128, entropie croisée pondérée (mêmes poids de classe qu'au L2, α = 0,75), au plus 10 époques, arrêt anticipé sur le macro-F1 val (patience 2), meilleure époque conservée. Chaque réseau est entraîné avec une carte aléatoire et avec la carte Word2Vec du L3 (ajustée pendant l'entraînement). GPU T4 : 16 s par époque (TextCNN), 58 s (BiLSTM).
+
+**Comparaison** (val 2024)
+
+| Modèle | Macro-F1 | Accuracy | Meilleure époque |
+|---|---|---|---|
+| **BiLSTM + attention, Word2Vec** | **0,766** | **0,858** | 6 |
+| TF-IDF + SVM réglé (L2) | 0,763 | 0,856 | — |
+| TextCNN, Word2Vec | 0,760 | 0,854 | 3 |
+| BiLSTM + attention, aléatoire | 0,747 | 0,846 | 9 |
+| TextCNN, aléatoire | 0,745 | 0,849 | 7 |
+| Moyenne Word2Vec + régression logistique (L3) | 0,700 | 0,829 | — |
+
+- **Le TextCNN corrige la dilution de la moyenne** (+6 points avec la même carte). Les gains sont maximaux sur les classes dont le signal tient en quelques mots : `payday_personal_loan` 0,404 → 0,544 (+14,0), `vehicle_loan` 0,610 → 0,708 (+9,8), `prepaid_card` +6,3 ; minimaux quand il est diffus (`credit_reporting` +1,1). Classe par classe, le TextCNN est à ±1,6 point du SVM.
+- **Carte Word2Vec contre carte aléatoire** : +6,2 points à la première époque pour le TextCNN (0,682 → 0,744), +7,2 pour le BiLSTM ; +1,5 et +1,9 point au final ; meilleure époque atteinte 2 fois plus tôt (3 contre 7 ; 6 contre 9). Les embeddings du L3 accélèrent et améliorent l'apprentissage.
+- **Surapprentissage rapide** : après la meilleure époque, la perte d'entraînement continue de baisser mais le macro-F1 val stagne ou baisse. 1,5 M des paramètres sont dans la couche d'embedding.
+
+**Test statistique** (bootstrap apparié, 1 000 tirages, mêmes récits pour les deux modèles ; SVM rechargé : macro-F1 0,7626)
+
+| Comparaison | Écart | IC 95 % | Part des tirages où A ne gagne pas |
+|---|---|---|---|
+| BiLSTM − SVM | +0,0036 | [−0,0017 ; +0,0093] | 0,089 |
+| TextCNN − SVM | −0,0021 | [−0,0074 ; +0,0032] | 0,798 |
+| BiLSTM − TextCNN | +0,0058 | [+0,0004 ; +0,0112] | 0,016 |
+
+- **Aucun réseau ne bat significativement le SVM**, qui s'entraîne en 15 s sur CPU. Le BiLSTM dépasse le TextCNN de justesse. Le score val du BiLSTM varie de ±1 point d'une époque à l'autre, et le choix de la meilleure époque sur la val est légèrement optimiste.
+- **Erreurs communes** : 11,4 % des récits sont mal classés par le BiLSTM et le SVM, contre 3,0 % par le SVM seul et 2,8 % par le BiLSTM seul. Environ 80 % des erreurs du BiLSTM sont partagées par un modèle de nature totalement différente : le plafond vient des données (récits ambigus ou mal étiquetés), pas des modèles.
+
+**Attention** (BiLSTM Word2Vec ; attention relative = poids × longueur du récit, 1 = moyenne du récit, mots vus au moins 30 fois)
+- Le réseau regarde surtout les **noms d'entreprises** (loancare, pennymac, shellpoint → mortgage ; edfinancial, nelnet, mohela, aidvantage → student_loan ; bmw, westlake, carvana → vehicle_loan), comme le SVM, et du **vocabulaire métier** (heloc, foreclose ; pslf, ibr, idr ; prepaid, unemployment ; payday).
+- Il repère les **lettres types** : certifiable (27,9), certifiably (22,0), stickler (20,5) pour credit_reporting.
+- Limite : l'attention indique où le réseau regarde, pas ce qu'il en conclut (`mortgage` et `student` sont très regardés dans les récits prédits checking_savings). Des méthodes d'attribution plus rigoureuses sont prévues au L10.
+- Les 3 erreurs visualisées relèvent des mêmes catégories que l'analyse du L2 (récit sur deux produits, étiquette douteuse).
+
+**Sentiment** (20 000 récits de la val, `text_light`)
+
+Réponse des entreprises : explication 64,4 %, correction sans argent 32,1 %, **remboursement 3,4 %**, réponse hors délai 0,2 % ; `timely_response` = non pour 0,9 %.
+
+| Méthode | Négatifs | Neutres | Positifs | Score moyen |
+|---|---|---|---|---|
+| VADER (lexique, compound) | 47,5 % | — | **48,0 %** | −0,008 |
+| RoBERTa transféré (`cardiffnlp/twitter-roberta-base-sentiment-latest`, P(pos) − P(neg)) | 69,1 % | 30,7 % | 0,1 % | −0,559 |
+
+- **VADER est piégé par le domaine** : il juge positive une plainte sur deux, à cause du vocabulaire poli ou de résolution (please help, resolved, approve, accurate) et de négations hors de ses règles (« Neither of these are accurate »). Corrélation de Spearman VADER / RoBERTa : **0,215**.
+- **Ton moyen selon la réponse** : les récits remboursés sont les moins négatifs selon RoBERTa (−0,496, contre −0,557 pour les explications) mais les plus négatifs selon VADER (−0,173) : la conclusion dépend de l'outil.
+- **Remboursement selon le ton** (quintiles RoBERTa) : 2,6 % pour les récits les plus négatifs, 4,7 % pour les moins négatifs. Mais le produit domine : de 0 à 0,2 % de remboursement en `credit_reporting` à 18 à 31 % en `prepaid_card`, et le lien est faible ou irrégulier à l'intérieur de chaque produit. L'effet du ton à produit égal reste à mesurer (régression logistique).
+
+**ABSA** (sentiment par aspect) : récits découpés en phrases ; aspects détectés par expressions régulières (frais, service client, délais, fraude ; « charged off » exclu des frais) ; chaque phrase notée par RoBERTa ; score d'un aspect = moyenne de ses phrases. 41 186 couples (phrase, aspect) sur 20 000 récits.
+
+| % des récits mentionnant l'aspect | délais | frais | fraude | service client |
+|---|---|---|---|---|
+| checking_savings | 55,6 | 21,4 | 39,3 | 37,6 |
+| credit_card | 53,9 | 35,1 | 31,0 | 34,3 |
+| credit_reporting | 30,2 | 5,6 | 35,9 | 6,4 |
+| debt_collection | 34,6 | 11,5 | 22,9 | 14,1 |
+| money_transfer | 54,5 | 14,8 | 42,8 | 37,9 |
+| mortgage | 71,9 | 37,7 | 11,3 | 40,6 |
+| payday_personal_loan | 57,1 | 34,9 | 17,5 | 25,0 |
+| prepaid_card | 48,8 | 16,0 | 32,7 | 34,6 |
+| student_loan | 65,3 | 30,4 | 8,9 | 34,0 |
+| vehicle_loan | 55,9 | 33,3 | 19,0 | 33,1 |
+
+- Délais dominants en `mortgage` et `student_loan` (procédures longues) ; fraude en `money_transfer` et `checking_savings`, et en `credit_reporting` sous forme d'usurpation d'identité ; service client presque absent de `credit_reporting` (lettres types, sans contact téléphonique).
+- **Aspect le plus mal vécu : la fraude** (−0,66), contre −0,42 à −0,44 pour les frais, les délais et le service client.
+
+| Remboursement (régression logistique) | Odds ratio sans le produit | Odds ratio à produit égal | p-valeur à produit égal |
+|---|---|---|---|
+| **Frais** | 3,80 | **2,25** [1,88 ; 2,69] | < 0,001 |
+| **Service client** | 3,10 | **1,50** [1,26 ; 1,78] | < 0,001 |
+| Délais | 1,63 | 1,18 [0,99 ; 1,40] | 0,066 |
+| Fraude | 1,24 | 1,14 [0,96 ; 1,36] | 0,141 |
+
+- Les frais sont le seul motif fortement lié au remboursement à produit égal (un frais contesté a un montant précis et s'annule facilement). L'effet du service client est réduit de moitié par le produit. La fraude n'est pas liée au remboursement : en `credit_reporting`, elle mène à une correction du rapport. Ce sont des corrélations, pas des effets causaux.
+- Limite : la détection par mots clés capte des faux positifs dans les lettres types (« subject to penalties under applicable laws »).
+
+## 9. Décisions prises (à ne pas remettre en cause sans raison)
 
 ### L0
 1. **Le texte brut est conservé tel quel** dans `narrative` (seuls les espaces de début et de fin sont retirés).
@@ -365,14 +465,14 @@ Tout est appris sur le train uniquement.
 8. **Tirage reproductible** : clé = hash de `complaint_id` avec la graine 42.
 
 ### L1
-9. **Tout ce qui apprend sur les données apprend sur le train** (vocabulaires, BPE, seuils, embeddings, IDF). Val et test servent seulement à mesurer.
+9. **Tout ce qui apprend sur les données apprend sur le train** (vocabulaires, BPE, seuils, embeddings, IDF, réseaux). Val et test servent seulement à mesurer.
 10. **Deux niveaux de nettoyage** : `light` pour les transformers (casse, ponctuation et nombres gardés), `full` pour TF-IDF (minuscules, `[NUM]`, `usc_XXXX`, ponctuation répétée réduite).
 11. **Tokens spéciaux** : `[PII]`, `[DATE]`, `[MONEY]`, `[URL]`, `[EMAIL]`, `[NUM]`. Le masque s'appelle `[PII]` et **non `[MASK]`**, qui est un token réservé de BERT.
 12. **Une rafale de masques = un seul `[PII]`.** **`[DATE]` sans l'année**, pour que le modèle ne devine pas l'époque du récit (le split est temporel).
 13. **Références au Code américain unifiées** en niveau `full` : `15 U.S. Code 1681c2`, `15 USC 1681`… → `usc_1681`. Les numéros d'articles portent du sens (1681 = FCRA, 1692 = FDCPA).
 14. **Les tokens spéciaux sont déclarés à chaque tokenizer** (spaCy : `add_special_case` ; Hugging Face : `additional_special_tokens`, avec `lstrip=True` pour GPT-2), pour ne jamais être découpés.
 15. **Négations gardées** (`not`, `no`, `never`, `n't`…) lors du retrait des mots vides.
-16. **Tokenizers retenus** : spaCy (par mots, niveau `full`, après `linguistic.py`) pour TF-IDF et les embeddings ; le tokenizer de chaque transformer, avec nos tokens spéciaux, pour le L5 ; notre **BPE 30k** pour les modèles entraînés depuis zéro (L4).
+16. **Tokenizers retenus** : spaCy (par mots, niveau `full`, après `linguistic.py`) pour TF-IDF, les embeddings et les réseaux du L4 ; le tokenizer de chaque transformer, avec nos tokens spéciaux, pour le L5 ; notre **BPE 30k** pour d'éventuels modèles entraînés depuis zéro sur des sous-mots.
 
 ### L2
 17. **Métrique principale : macro-F1.** L'accuracy n'est donnée qu'en complément (le modèle « classe majoritaire » atteint 0,606).
@@ -384,33 +484,42 @@ Tout est appris sur le train uniquement.
 
 ### L3
 23. **Embeddings sur `text_tfidf`** (lemmes, sans mots vides) : voisins plus informatifs, et comparaison directe avec le TF-IDF du L2 sur le même texte.
-24. **Word2Vec skip-gram 100d est l'embedding de référence pour le L4** (meilleur sur le sens). FastText est conservé pour les mots inconnus et les fautes de frappe.
+24. **Word2Vec skip-gram 100d est l'embedding de référence** (meilleur sur le sens), utilisé pour initialiser les réseaux du L4. FastText est conservé pour les mots inconnus et les fautes de frappe.
 25. **Le modèle de langue utilise `text_full`** (mots outils gardés, nécessaires à la grammaire), avec **la même quantité de texte par produit** (3 600 récits) pour que les perplexités soient comparables.
 26. **Kneser-Ney implémenté à la main** (≈ 30 lignes, vérifié par la somme des probabilités) : l'implémentation NLTK est trop lente à cette échelle.
 
-## 9. Points d'attention
+### L4
+27. **Vocabulaire des réseaux = vocabulaire Word2Vec du L3**, pour que chaque mot ait une position pré-apprise ; longueur maximale 256 mots (troncature en fin de récit).
+28. **Protocole commun à tous les réseaux** : mêmes poids de classe qu'au L2 (α = 0,75), arrêt anticipé sur le macro-F1 val, meilleure époque conservée, comparaison au SVM par bootstrap apparié sur les mêmes récits.
+29. **Le SVM du L2 reste le modèle de référence pour la classification Product** : les réseaux du L4 ne le battent pas significativement, pour un coût d'entraînement 30 fois plus élevé sur GPU.
+30. **Sentiment de référence : RoBERTa transféré** (sur `text_light`, troncature à 512 tokens), VADER étant inadapté au domaine. Tout lien entre ton ou aspect et réponse de l'entreprise est mesuré **à produit égal**.
+
+## 10. Points d'attention
 
 - **Rupture `credit_reporting` 2026 (expliquée)** : artefact de publication, pas une dérive réelle. `drift_2026` s'évalue classe par classe.
 - **Campagne de janvier 2025 (à traiter)** : récits à textes variants, invisibles pour la dédup exacte. **Le MinHash devient prioritaire.**
-- **Quasi-doublons non traités** : des variantes proches d'une même lettre type peuvent se trouver à la fois en train et en test. L'analyse d'erreurs L2 en a trouvé plusieurs, et la perplexité de `credit_reporting` (29,8) le confirme.
-- **Écart de distribution voulu** : 25 % de credit reporting en train, 56 % en test. Traité au L2 par des poids de classe (α = 0,75). La correction des logits n'a pas été testée.
-- **Plafond lié aux étiquettes** : 75 % des erreurs analysées viennent de récits ambigus ou mal étiquetés. L'objectif de 0,85 en macro-F1 sur Product sera probablement hors d'atteinte avec ce découpage, quel que soit le modèle. À confirmer au L5.
-- **Dépendance aux noms d'entreprises** : environ 2 points de macro-F1 (borne basse), jusqu'à 4,4 pour `student_loan`. À surveiller sur `drift_2026` (gestionnaires de prêts étudiants qui changent) et au L10 (équité).
+- **Quasi-doublons non traités** : des variantes proches d'une même lettre type peuvent se trouver à la fois en train et en test. L'analyse d'erreurs L2 en a trouvé plusieurs ; la perplexité de `credit_reporting` (29,8) et l'attention portée à « certifiable » ou « stickler » le confirment.
+- **Écart de distribution voulu** : 25 % de credit reporting en train, 56 % en test. Traité par des poids de classe (α = 0,75). La correction des logits n'a pas été testée.
+- **Plafond lié aux étiquettes** : 75 % des erreurs analysées au L2 viennent de récits ambigus ou mal étiquetés, et 80 % des erreurs du BiLSTM sont partagées par le SVM. L'objectif de 0,85 en macro-F1 sur Product sera probablement hors d'atteinte avec ce découpage, quel que soit le modèle. À confirmer au L5.
+- **Dépendance aux noms d'entreprises** : environ 2 points de macro-F1 pour le SVM (borne basse), jusqu'à 4,4 pour `student_loan` ; le BiLSTM porte aussi son attention sur ces noms. À surveiller sur `drift_2026` (gestionnaires de prêts étudiants qui changent) et au L10 (équité).
 - **Artefacts d'époque** : `unemployment` et `edd` tirent vers `prepaid_card` (cartes d'allocations chômage de la période Covid). Risque de dérive sur 2025-2026.
-- **Comparaison L2 non équitable** : seul le SVM a été réglé.
+- **Comparaison L2 non équitable** : seul le SVM a été réglé. Au L4, la sélection de la meilleure époque sur la val avantage légèrement les réseaux.
+- **Variabilité des réseaux** : ±1 point de macro-F1 val d'une époque à l'autre et quelques millièmes entre deux entraînements identiques sur GPU. Toute comparaison passe par un bootstrap apparié.
+- **Outils de sentiment généralistes** : VADER (lexique) et RoBERTa (appris sur des tweets) ne sont pas faits pour des plaintes bancaires ; VADER juge positive une plainte sur deux.
+- **ABSA par mots clés** : faux positifs dans les lettres types (« penalties under applicable laws ») et faux négatifs pour les aspects exprimés sans les mots de la liste. Pas de jeu annoté pour mesurer la précision.
 - **Tokens collés** : ponctuation collée aux mots (`/equifax`, `vehicle-`, `fraudulent/`) et mots sans espace (`ireceive`, `balanceowe`, `originalcreditor`), visibles dans les voisins Word2Vec. Impact faible ; à corriger dans `clean.py`.
-- **Textes longs** : environ 10 % des récits dépassent 512 tokens. Stratégie (troncature, découpage, modèle long) à choisir au L5.
+- **Textes longs** : environ 10 % des récits dépassent 512 tokens (et 6,2 % dépassent 256 mots après nettoyage). Stratégie (troncature, découpage, modèle long) à choisir au L5.
 - **Hapax et mots trop fréquents** : gérés au L2 par `min_df = 5` et `max_df = 0,5`, et au L3 par `min_count = 5` et le sous-échantillonnage.
-- **Notre BPE n'est pas compatible avec les modèles pré-entraînés** (BERT, GPT-2) : leurs poids dépendent de leur propre vocabulaire. L'écart de vocabulaire mesuré, et le décalage de domaine de GloVe, justifient le DAPT au L5.
+- **Notre BPE n'est pas compatible avec les modèles pré-entraînés** (BERT, GPT-2) : leurs poids dépendent de leur propre vocabulaire. L'écart de vocabulaire mesuré, et le décalage de domaine de GloVe et de VADER, justifient le DAPT au L5.
 - **spaCy sur texte en minuscules** (niveau `full`) : étiquetage grammatical un peu moins précis.
 - **Bruit d'étiquette** : les étiquettes sont choisies par le consommateur ; certains groupes de copies identiques portent plusieurs produits.
 
-## 10. Reste à faire
+## 11. Reste à faire
 
 ### Points ouverts du L0
 - [x] Investiguer l'anomalie `credit_reporting` 2026
-- [ ] Quasi-doublons MinHash/LSH (`datasketch`) — **prioritaire** (campagne de janvier 2025, lettres types vues en L2 et L3) ; réutilisable en L7
-- [ ] Harmoniser la taxonomie `issue` / `sub_issue` (`configs/issue_mapping.csv`) — **indispensable avant la cible Issue**
+- [ ] Quasi-doublons MinHash/LSH (`datasketch`) — **prioritaire** (campagne de janvier 2025, lettres types vues en L2, L3 et L4) ; réutilisable en L7
+- [ ] Harmoniser la taxonomie `issue` / `sub_issue` (`configs/issue_mapping.csv`) — **indispensable avant la cible Issue (L5)**
 - [ ] Reproductibilité : `dvc init`, `dvc.yaml`, `Makefile`, script de vérification des SHA-256
 - [ ] Hygiène : ruff, pre-commit
 - [ ] Vérifier la licence de réutilisation des données CFPB
@@ -443,17 +552,29 @@ Tout est appris sur le train uniquement.
 - [x] Comparaison avec GloVe pré-entraîné : décalage de domaine
 - [x] Modèle n-gramme Kneser-Ney : perplexité par produit, classification, génération, limites
 
-### L4 — Deep learning from scratch (prochain lot)
-- [ ] TextCNN et BiLSTM + attention en PyTorch pur
-- [ ] Couches d'embedding initialisées aléatoirement contre Word2Vec du L3
-- [ ] Visualisation des poids d'attention sur des exemples
-- [ ] Sentiment : lexique VADER contre modèle transféré ; corrélation avec « Company response » et « Timely response »
-- [ ] ABSA : sentiment par aspect (frais, service client, délai, fraude)
+### L4
+- [x] TextCNN et BiLSTM + attention en PyTorch pur
+- [x] Couches d'embedding initialisées aléatoirement contre Word2Vec du L3
+- [x] Bootstrap apparié contre le SVM du L2, erreurs communes
+- [x] Visualisation des poids d'attention sur des exemples et bilan par produit
+- [x] Sentiment : lexique VADER contre modèle transféré (RoBERTa) ; lien avec « Company response » et « Timely response »
+- [x] ABSA : sentiment par aspect (frais, service client, délais, fraude) et lien avec le remboursement à produit égal
+- [ ] Effet du ton (VADER, RoBERTa) sur le remboursement à produit égal (régression logistique)
+
+### L5 — Transformers et fine-tuning (prochain lot)
+- [ ] Prérequis : `issue_mapping.csv` (taxonomie des motifs)
+- [ ] Bloc transformer (self-attention multi-têtes) implémenté à la main, vérifié sur une tâche jouet
+- [ ] Fine-tuning de 3 encodeurs (DistilBERT, RoBERTa-base, DeBERTa-v3 ou ModernBERT) sur Product et Issue
+- [ ] Domain-adaptive pretraining (MLM sur les récits non étiquetés), puis fine-tuning ; mesure du gain
+- [ ] Classification hiérarchique (tête unique, cascade, perte hiérarchique) ; multi-label sur Tags
+- [ ] Textes longs : troncature tête/queue, découpage + agrégation, modèle à contexte long
+- [ ] Déséquilibre (pondération, focal loss, sur-échantillonnage) ; calibration (temperature scaling, ECE)
+- [ ] Évaluation finale de tous les modèles sur le test 2025
 
 ### Ensuite
-- **L5 à L10** et MLOps : voir le cahier des charges.
+- **L6 à L10** et MLOps : voir le cahier des charges.
 
-## 11. Arborescence
+## 12. Arborescence
 
 ```
 ComplaintLens/
@@ -487,7 +608,8 @@ ComplaintLens/
 ├── notebooks/
 │   ├── complaintlens-l1.ipynb         # analyse du L1 (Kaggle)
 │   ├── complaintlens-l2-models.ipynb  # baselines L2 (Kaggle)
-│   └── complaintlens-l3.ipynb         # embeddings et n-grammes L3 (Kaggle)
+│   ├── complaintlens-l3.ipynb         # embeddings et n-grammes L3 (Kaggle)
+│   └── complaintlens-l4.ipynb         # réseaux, attention, sentiment, ABSA L4 (Kaggle, GPU)
 ├── docs/
 │   └── datasheet.md                   # fiche du corpus (Gebru et al.)
 ├── reports/
@@ -518,17 +640,32 @@ ComplaintLens/
 │   │   ├── ablation_preprocessing.csv
 │   │   ├── ablation_company_mask.csv
 │   │   └── errors_sample_annotated.csv
-│   └── l3/
-│       ├── analogies_detail.csv       # 3CosAdd et 3CosMul, Word2Vec et FastText
-│       ├── analogies_summary.csv
-│       ├── odd_one_out.csv
-│       ├── extrinsic_comparison.csv
-│       ├── extrinsic_per_class.csv
-│       ├── analogies_glove_vs_w2v.csv
-│       ├── odd_one_out_glove_vs_w2v.csv
-│       ├── domain_shift_neighbors.csv
-│       ├── ngram_perplexity_matrix.csv
-│       └── ngram_generations.csv
+│   ├── l3/
+│   │   ├── analogies_detail.csv       # 3CosAdd et 3CosMul, Word2Vec et FastText
+│   │   ├── analogies_summary.csv
+│   │   ├── odd_one_out.csv
+│   │   ├── extrinsic_comparison.csv
+│   │   ├── extrinsic_per_class.csv
+│   │   ├── analogies_glove_vs_w2v.csv
+│   │   ├── odd_one_out_glove_vs_w2v.csv
+│   │   ├── domain_shift_neighbors.csv
+│   │   ├── ngram_perplexity_matrix.csv
+│   │   └── ngram_generations.csv
+│   └── l4/
+│       ├── cnn_learning_curves.csv
+│       ├── cnn_per_class.csv          # moyenne L3 vs TextCNN vs SVM
+│       ├── bilstm_learning_curves.csv
+│       ├── l4_comparison.csv
+│       ├── bootstrap_l4_vs_l2.csv
+│       ├── attention_examples.html
+│       ├── attention_top_words.csv
+│       ├── sentiment_by_response.csv
+│       ├── sentiment_quintiles_relief.csv
+│       ├── sentiment_quintiles_relief_by_product.csv
+│       ├── absa_frequency_by_product.csv
+│       ├── absa_sentiment_by_aspect.csv
+│       ├── absa_relief_by_aspect.csv
+│       └── absa_logit_relief.csv
 └── data/                              # hors Git
     ├── raw/{ccdb_exports,ccdb_current}/, manifest.json
     ├── interim/{parts/, narratives*.parquet, audit/}
