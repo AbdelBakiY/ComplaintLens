@@ -141,9 +141,9 @@ payday_personal_loan,Problem with additional add-on products or services,Problem
 payday_personal_loan,Getting a line of credit,Getting a line of credit,actuel
 payday_personal_loan,Received a loan you didn't apply for,Received a loan you didn't apply for,actuel
 payday_personal_loan,Can't contact lender or servicer,Can't contact lender or servicer,actuel
-payday_personal_loan,Can't stop withdrawals from your bank account,Can't stop withdrawals from your bank account,actuel
-payday_personal_loan,Money was taken from your bank account on the wrong day or for the wrong amount,Money was taken from your bank account on the wrong day or for the wrong amount,actuel
-payday_personal_loan,Loan payment wasn't credited to your account,Loan payment wasn't credited to your account,actuel
+payday_personal_loan,Can't stop withdrawals from your bank account,Problem with withdrawals from your bank account,regroupé : prélèvements non voulus
+payday_personal_loan,Money was taken from your bank account on the wrong day or for the wrong amount,Problem with withdrawals from your bank account,regroupé : prélèvements non voulus
+payday_personal_loan,Loan payment wasn't credited to your account,Problem when making payments,regroupé : problème de paiement
 payday_personal_loan,Vehicle was repossessed or sold the vehicle,Vehicle was repossessed or sold the vehicle,actuel
 payday_personal_loan,"Was approved for a loan, but didn't receive the money","Was approved for a loan, but didn't receive the money",actuel
 payday_personal_loan,Problem with cash advance,Problem with cash advance,actuel
@@ -160,9 +160,9 @@ payday_personal_loan,Shopping for a line of credit,Getting a line of credit,anci
 payday_personal_loan,Managing the line of credit,Problem when making payments,ancien « Consumer Loan »
 payday_personal_loan,Received a loan I didn't apply for,Received a loan you didn't apply for,renommage
 payday_personal_loan,Can't contact lender,Can't contact lender or servicer,renommage
-payday_personal_loan,Can't stop charges to bank account,Can't stop withdrawals from your bank account,renommage
-payday_personal_loan,Payment to acct not credited,Loan payment wasn't credited to your account,renommage
-payday_personal_loan,Charged bank acct wrong day or amt,Money was taken from your bank account on the wrong day or for the wrong amount,renommage
+payday_personal_loan,Can't stop charges to bank account,Problem with withdrawals from your bank account,ancien : prélèvements non voulus
+payday_personal_loan,Payment to acct not credited,Problem when making payments,ancien : problème de paiement
+payday_personal_loan,Charged bank acct wrong day or amt,Problem with withdrawals from your bank account,ancien : prélèvements non voulus
 payday_personal_loan,Applied for loan/did not receive money,"Was approved for a loan, but didn't receive the money",renommage
 payday_personal_loan,"Was approved for a loan, but didn't receive money","Was approved for a loan, but didn't receive the money",variante de libellé
 payday_personal_loan,Lender repossessed or sold the vehicle,Vehicle was repossessed or sold the vehicle,renommage
@@ -212,7 +212,7 @@ student_loan,Problem with fraud alerts or security freezes,Credit reporting prob
 student_loan,Unable to get your credit report or credit score,Credit reporting problem,motif rapport de crédit hors credit_reporting
 vehicle_loan,Managing the loan or lease,Managing the loan or lease,actuel
 vehicle_loan,Problems at the end of the loan or lease,Problems at the end of the loan or lease,actuel
-vehicle_loan,Repossession,Repossession,actuel
+vehicle_loan,Repossession,Repossession,actuel (créé récemment : avant, les saisies étaient dans Struggling to pay)
 vehicle_loan,Getting a loan or lease,Getting a loan or lease,actuel
 vehicle_loan,Struggling to pay your loan,Struggling to pay your loan,actuel
 vehicle_loan,Problems when you are unable to pay,Struggling to pay your loan,ancien
