@@ -212,7 +212,7 @@ student_loan,Problem with fraud alerts or security freezes,Credit reporting prob
 student_loan,Unable to get your credit report or credit score,Credit reporting problem,motif rapport de crédit hors credit_reporting
 vehicle_loan,Managing the loan or lease,Managing the loan or lease,actuel
 vehicle_loan,Problems at the end of the loan or lease,Problems at the end of the loan or lease,actuel
-vehicle_loan,Repossession,Repossession,actuel (créé récemment : avant, les saisies étaient dans Struggling to pay)
+vehicle_loan,Repossession,Repossession,actuel (créé récemment ; avant cela les saisies étaient classées dans Struggling to pay)
 vehicle_loan,Getting a loan or lease,Getting a loan or lease,actuel
 vehicle_loan,Struggling to pay your loan,Struggling to pay your loan,actuel
 vehicle_loan,Problems when you are unable to pay,Struggling to pay your loan,ancien
